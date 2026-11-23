@@ -568,6 +568,16 @@ svg .mid { text-anchor: middle; }
 .trk__play:hover .trk__btn, .trk__play:focus-visible .trk__btn { background: var(--pink); color: #000; }
 .trk iframe { display: block; width: min(100%, 26rem); height: 80px; border: 0; border-radius: 12px; }
 
+.b-thrown { --bg: #02161c; --chip: #fff; --chip-ink: #02161c; color: #fff; background: linear-gradient(rgba(2, 14, 18, .3), rgba(2, 14, 18, .82) 70%), #02161c url("m-thrown-leak.webp") center top / cover no-repeat; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem 3rem; align-items: end; }
+.thrown__name { margin: 0; font: 700 clamp(5rem, 17vw, 14rem)/.8 "UnifrakturCook", var(--copy); font-synthesis: none; letter-spacing: -.02em; }
+.thrown__list { display: grid; gap: 1.8rem; margin: 2.6rem 0 0; padding: 0; list-style: none; }
+.thrown__list li { display: grid; grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr); gap: 0 1.4rem; align-items: center; }
+.thrown__list img { display: block; width: 100%; height: auto; }
+.thrown__list h3 { margin: 0; font: 700 clamp(2rem, 3.4vw, 2.9rem)/1 "UnifrakturCook", var(--copy); font-synthesis: none; }
+.b-thrown .thrown__rel { margin: .5rem 0 0; font: 800 .68rem/1.3 "Unbounded", var(--logo); letter-spacing: .32em; text-transform: uppercase; }
+.b-thrown .trk { margin-top: .8rem; }
+.thrown__band { display: block; width: min(24rem, 86%); height: auto; justify-self: end; border: .5rem solid #fff; border-bottom-width: 2.2rem; rotate: 3deg; box-shadow: .6rem .7rem 0 rgba(0, 0, 0, .55); }
+
 .b-mega { --bg: #0a0a0a; --chip: #e1001a; color: #fff; }
 .mega__head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1.5rem 2rem; }
 .mega__name { margin: 0; font: 400 clamp(3.1rem, 13vw, 11rem)/.86 "Russo One", var(--logo); font-synthesis: none; text-transform: uppercase; letter-spacing: -.02em; }
@@ -665,6 +675,8 @@ svg .mid { text-anchor: middle; }
 
 @media (prefers-reduced-motion: no-preference) {
   .mega__trk--ro::after { animation: snow 7s linear infinite; }
+  .thrown__band { animation: flash 7s steps(1) infinite; }
+  @keyframes flash { 0%, 100% { filter: none; } 40% { filter: brightness(2.4) contrast(.8); } 41.5% { filter: brightness(1.4); } 43% { filter: none; } }
   .cloud__name { animation: haze 9s ease-in-out infinite alternate; }
   @keyframes haze { from { filter: blur(0); } to { filter: blur(2.5px); } }
   .stp__embers::after { animation: ember 6s linear infinite; }
@@ -678,6 +690,8 @@ svg .mid { text-anchor: middle; }
 }
 @media (min-width: 761px) {
   .mega__tracks { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .b-thrown { grid-template-columns: minmax(0, 1fr) minmax(0, 24rem); padding: 4rem 6% 4rem 5%; }
+  .thrown__band { width: 100%; margin-bottom: 1rem; }
   .b-dalav { padding-left: 5%; }
   .dalav__tracks { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .dalav__trk--vomit { margin-top: 2.6rem; }
