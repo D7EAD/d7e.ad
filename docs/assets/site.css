@@ -561,6 +561,8 @@ svg .mid { text-anchor: middle; }
 .mu-top { --bg: #000; background: linear-gradient(100deg, rgba(0, 0, 0, .62) 0 38%, rgba(0, 0, 0, .18) 70%), #000 url("music-wall.webp") center / cover no-repeat; color: #fff; min-height: 30rem; display: grid; align-content: center; gap: 1.6rem; padding-top: clamp(5.5rem, 9vw, 7rem); }
 .mu-top .mine { grid-column: auto; grid-row: auto; margin: 0 0 0 1%; width: min(29rem, 86%); rotate: -5deg; }
 .mu-top .num { max-width: 34rem; font-size: clamp(2.3rem, 4.4vw, 4rem); line-height: .86; color: var(--yellow); }
+.mu-cam { width: min(34rem, 100%); margin-top: 1rem; rotate: 3deg; }
+.mu-cam .cam__pic { aspect-ratio: 1200 / 1008; background: #000; }
 .trk { margin: .5rem 0 0; }
 .trk__play { display: inline-flex; align-items: center; gap: .7rem; color: inherit; text-decoration: none; }
 .trk__btn { padding: .05rem .5rem .14rem; background: var(--chip, #000); color: var(--chip-ink, #fff); font: 400 1.8rem/1 var(--pen); letter-spacing: 0; text-transform: none; white-space: nowrap; }
@@ -690,6 +692,10 @@ svg .mid { text-anchor: middle; }
 }
 @media (min-width: 761px) {
   .mega__tracks { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .mu-top { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); grid-template-rows: 1fr auto; column-gap: 3rem; align-items: center; padding-bottom: 3.4rem; }
+  .mu-top .mine { grid-column: 1; grid-row: 1; align-self: end; }
+  .mu-top .num { grid-column: 1; grid-row: 2; align-self: start; }
+  .mu-cam { grid-column: 2; grid-row: 1 / span 2; justify-self: center; margin-top: 0; }
   .b-thrown { grid-template-columns: minmax(0, 1fr) minmax(0, 24rem); padding: 4rem 6% 4rem 5%; }
   .thrown__band { width: 100%; margin-bottom: 1rem; }
   .b-dalav { padding-left: 5%; }
