@@ -33,6 +33,18 @@
     document.querySelectorAll('main > .fr').forEach((el) => io.observe(el));
   }
 
+  document.querySelectorAll('.trk[data-spotify]').forEach((el) => {
+    el.querySelector('a').addEventListener('click', (ev) => {
+      if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.button) return;
+      ev.preventDefault();
+      const player = document.createElement('iframe');
+      player.src = `https://open.spotify.com/embed/track/${el.dataset.spotify}?theme=0`;
+      player.title = `spotify player: ${el.dataset.title}`;
+      player.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+      el.replaceChildren(player);
+    });
+  });
+
   document.querySelectorAll('[data-embargo]').forEach((el) => {
     const [y, m, d] = el.dataset.embargo.split('-').map(Number);
     if (Date.now() < Date.UTC(y, m - 1, d + 1)) return;
