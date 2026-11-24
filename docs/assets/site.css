@@ -282,6 +282,7 @@ svg .mid { text-anchor: middle; }
 .logo { display: block; height: auto; max-width: 100%; }
 .redact { display: inline-block; width: 8.6em; height: .82em; vertical-align: -.08em; background: #000; rotate: -1.2deg; clip-path: polygon(0 12%, 31% 0, 64% 9%, 100% 2%, 98% 88%, 70% 100%, 38% 91%, 2% 97%); }
 .redact + .redact { rotate: 1.6deg; transform: scaleX(-1); }
+.redact + .redact + .redact { rotate: -.5deg; transform: scaleY(-1); }
 .s-new { --cols: 55fr 45fr; }
 .f-fprime { --bg: var(--blue); color: #fff; }
 .f-fprime .art { display: flex; align-items: center; gap: 1rem; }
