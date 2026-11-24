@@ -294,7 +294,14 @@ svg .mid { text-anchor: middle; }
 .f-php { --bg: #cfc4ff; }
 .f-php .logo { width: min(24rem, 92%); rotate: 4deg; }
 .f-php .pen { margin-top: 2.4rem; }
+.f-mysql { --bg: #00758f; color: #fff; display: flex; flex-wrap: wrap; align-items: center; gap: 1.6rem 4.5rem; }
+.f-mysql .logo { width: min(19rem, 74%); rotate: -6deg; }
+.f-mysql .pen { font-size: clamp(2.4rem, 4.2vw, 3.7rem); line-height: .95; rotate: 2deg; }
 @media (min-width: 761px) {
+  .f-mysql { flex-wrap: nowrap; gap: clamp(2rem, 5vw, 4.5rem); padding: 2.2rem 2rem 2.8rem 13%; }
+  .f-mysql .logo { flex: none; width: min(21rem, 27vw); }
+  .f-mysql .pen { font-size: min(3.3rem, 3.3vw); }
+  .f-mysql .redact { width: 6.4em; }
   .f-fprime { padding: 3.4rem 1.5rem 2.6rem 6%; }
   .f-php { padding: 5.5rem 2rem 2rem 3.2rem; }
 }
