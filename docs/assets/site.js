@@ -33,6 +33,13 @@
     document.querySelectorAll('main > .fr').forEach((el) => io.observe(el));
   }
 
+  if ('IntersectionObserver' in window) {
+    const near = new IntersectionObserver((entries) => {
+      entries.forEach((e) => e.target.classList.toggle('is-off', !e.isIntersecting));
+    }, { rootMargin: '150px 0px' });
+    document.querySelectorAll('.fr').forEach((el) => near.observe(el));
+  }
+
   document.querySelectorAll('.trk[data-spotify]').forEach((el) => {
     el.querySelector('a').addEventListener('click', (ev) => {
       if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.button) return;
