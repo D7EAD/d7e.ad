@@ -15,8 +15,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#ff2a7f">
 <link rel="preload" href="../assets/fonts/reenie-beanie-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../assets/site.css?v=bb6403c584">
-<script src="../assets/site.js?v=dfa700c6a3" defer></script>
+<link rel="stylesheet" href="../assets/site.css?v=e77db0523c">
+<script src="../assets/site.js?v=52b8136f3d" defer></script>
 </head>
 <body>
 
@@ -72,7 +72,7 @@
 <section class="fr p-sec c-paper">
 <div class="p-col p-col--a">
 <h2 id="intro">So WTF is RedStar OS?</h2>
-<img class="p-logo" src="../assets/redstar/redstar-logo.webp" width="640" height="217" alt="the red star os wordmark, in korean">
+<img class="p-logo" src="../assets/redstar/redstar-logo.webp" width="640" height="217" alt="the red star os wordmark, in korean" loading="lazy" decoding="async">
 <p><strong>RedStar OS 3.0</strong> is Kim Jong Un's RETARDED ASS idea of a secure operating system. Built on a Fedora/RHEL base with kernel 2.6.38.8-24, i386, GCC 4.4.0. It ships with a knockoff macOS UI, Korean localization, and a surveillance stack designed to monitor every citizen unlucky enough to sit in front of it: real-time file integrity monitoring via <code>intcheck</code>, content watermarking, USB tracking, and a "locked-down" (lol) user environment. Government-provisioned installs are supposed to be hardened. Compiling and executing arbitrary code is supposed to be impossible without a working exploit chain.</p>
 <p>Prior research by Hacker House in 2016 and 32C3 in 2015 scratched the surface, but the DPRK-custom binaries at the heart of these chains have never been publicly torn apart: <code>imagemount</code>, <code>securityd</code>, <code>duid</code>, <code>libImgSecurity.so</code>, <code>libduiengine.so</code>. No CVEs have ever been assigned for any Red Star OS vulnerability because nobody bothered. This is suprising, because this may have been the easiest set of vulnerablities I have ever fucking found lol.</p>
 </div>
@@ -87,7 +87,7 @@
 </figure>
 <p><code>ALL ALL=NOPASSWD:</code> means any user, on any host, may run the command as root without entering a password. <code>scnprc</code> and <code>opprc</code> are surveillance tools that auto-start at login to snitch like a bitch on the user. The DPRK developers slapped the same privilege pattern on <code>imagemount</code>, a disk image mounter, without spending five minutes thinking about what happens when you give every user passwordless root access to a binary that pipes input to a shell. ngl the human side of me assumes they probably realized how bad of an idea this was afterwards, but if they said anything, they'd be shot by firing squad or whatever they do there.</p>
 <figure class="shot shot--a">
-<a href="../assets/redstar/imagemount-2.webp"><img src="../assets/redstar/imagemount-2.webp" width="1280" height="768" alt="sudo -l output on RedStar OS showing NOPASSWD entries" loading="lazy"></a>
+<a href="../assets/redstar/imagemount-2.webp"><img src="../assets/redstar/imagemount-2.webp" width="1280" height="768" alt="sudo -l output on RedStar OS showing NOPASSWD entries" loading="lazy" decoding="async"></a>
 <figcaption>sudo -l as normal-user</figcaption>
 </figure>
 </div>
@@ -129,21 +129,21 @@
 </figure>
 <p>Sudoers grants NOPASSWD. The authorization check passes because PAM timestamp reuses the sudo session's cached credentials. <code>popen()</code> splits on semicolons and executes each command as root.</p>
 <figure class="shot shot--c">
-<a href="../assets/redstar/imagemount-3.webp"><img src="../assets/redstar/imagemount-3.webp" width="1280" height="768" alt="Running the imagemount exploit command on RedStar OS" loading="lazy"></a>
+<a href="../assets/redstar/imagemount-3.webp"><img src="../assets/redstar/imagemount-3.webp" width="1280" height="768" alt="Running the imagemount exploit command on RedStar OS" loading="lazy" decoding="async"></a>
 <figcaption>Injecting the payload w/ sudo imagemount</figcaption>
 </figure>
 <figure class="shot shot--b">
-<a href="../assets/redstar/imagemount-4.webp"><img src="../assets/redstar/imagemount-4.webp" width="1280" height="768" alt="ls /tmp showing SUID root rsh binary" loading="lazy"></a>
+<a href="../assets/redstar/imagemount-4.webp"><img src="../assets/redstar/imagemount-4.webp" width="1280" height="768" alt="ls /tmp showing SUID root rsh binary" loading="lazy" decoding="async"></a>
 <figcaption>SUID root binary dropped at /tmp/rsh</figcaption>
 </figure>
 <figure class="shot shot--a">
-<a href="../assets/redstar/imagemount-5.webp"><img src="../assets/redstar/imagemount-5.webp" width="1280" height="768" alt="Root shell and /etc/shadow dump on RedStar OS" loading="lazy"></a>
+<a href="../assets/redstar/imagemount-5.webp"><img src="../assets/redstar/imagemount-5.webp" width="1280" height="768" alt="Root shell and /etc/shadow dump on RedStar OS" loading="lazy" decoding="async"></a>
 <figcaption>euid=0, /etc/shadow dumped</figcaption>
 </figure>
 </div>
 </section>
 <section class="fr p-sec c-lilac">
-<img class="p-honk" src="../assets/clown.webp" width="840" height="677" alt="" loading="lazy">
+<img class="p-honk" src="../assets/clown.webp" width="840" height="677" alt="" loading="lazy" decoding="async">
 <div class="p-col p-col--d">
 <h2 id="chain2"><s>CVE-2026-XXXX:</s> duid: Root via Shared Memory</h2>
 <h3>The Architecture</h3>
@@ -157,7 +157,7 @@
 <pre><code><span class="l">key        shmid  owner  perms  bytes   nattch  status</span><span class="l hl">0x77c0276e 0      root   666    1556    1</span></code></pre>
 </figure>
 <figure class="shot shot--d">
-<a href="../assets/redstar/duid-1.webp"><img src="../assets/redstar/duid-1.webp" width="1280" height="768" alt="duid process running as root and shared memory segment with 666 permissions" loading="lazy"></a>
+<a href="../assets/redstar/duid-1.webp"><img src="../assets/redstar/duid-1.webp" width="1280" height="768" alt="duid process running as root and shared memory segment with 666 permissions" loading="lazy" decoding="async"></a>
 <figcaption>duid running as root, shm segment world-writable</figcaption>
 </figure>
 <h3>The Injection</h3>
@@ -178,17 +178,17 @@
 </figure>
 <p>Just 15 lines of Python to get root lol how fucking retarded.</p>
 <figure class="shot shot--b">
-<a href="../assets/redstar/duid-2.webp"><img src="../assets/redstar/duid-2.webp" width="1280" height="768" alt="duid exploit script in RedStar OS Simple Text editor" loading="lazy"></a>
+<a href="../assets/redstar/duid-2.webp"><img src="../assets/redstar/duid-2.webp" width="1280" height="768" alt="duid exploit script in RedStar OS Simple Text editor" loading="lazy" decoding="async"></a>
 <figcaption>Exploit script open in Simple Text on the target</figcaption>
 </figure>
 <figure class="shot shot--c">
-<a href="../assets/redstar/duid-3.webp"><img src="../assets/redstar/duid-3.webp" width="1280" height="768" alt="duid exploit execution showing root shell and /etc/shadow" loading="lazy"></a>
+<a href="../assets/redstar/duid-3.webp"><img src="../assets/redstar/duid-3.webp" width="1280" height="768" alt="duid exploit execution showing root shell and /etc/shadow" loading="lazy" decoding="async"></a>
 <figcaption>euid=0, /etc/shadow dumped</figcaption>
 </figure>
 </div>
 </section>
 <section class="fr p-sec c-lemon">
-<span class="seal p-stamp" aria-hidden="true"><img src="../assets/seal-dprk.webp" width="420" height="501" alt="" loading="lazy"><img class="seal__splat" src="../assets/splat.webp" width="900" height="921" alt="" loading="lazy"></span>
+<span class="seal p-stamp" aria-hidden="true"><img src="../assets/seal-dprk.webp" width="420" height="501" alt="" loading="lazy" decoding="async"><img class="seal__splat" src="../assets/splat.webp" width="900" height="921" alt="" loading="lazy" decoding="async"></span>
 <div class="p-col p-col--b">
 <h2 id="chain3"><s>CVE-2026-XXXX:</s> securityd: Root via Authorization Socket</h2>
 <h3>The Architecture</h3>
@@ -225,7 +225,7 @@
 </figure>
 <p>The daemon's intended behavior is to run arbitrary executables as root. The vulnerability is that it does exactly what it was designed to do, for anyone who asks, because the DPRK forgot to add the part where you check who's asking.</p>
 <figure class="shot shot--a">
-<a href="../assets/redstar/securityd-1.webp"><img src="../assets/redstar/securityd-1.webp" width="1024" height="768" alt="securityd exploit execution showing root shell" loading="lazy"></a>
+<a href="../assets/redstar/securityd-1.webp"><img src="../assets/redstar/securityd-1.webp" width="1024" height="768" alt="securityd exploit execution showing root shell" loading="lazy" decoding="async"></a>
 <figcaption>Socket connect, execv, euid=0</figcaption>
 </figure>
 </div>
@@ -239,7 +239,7 @@
 <pre><code><span class="l">dbus-send --system --dest=system.service.intcheck \</span><span class="l">  /system/service/intcheck \</span><span class="l">  system.service.intcheck.EnableRTScan boolean:false</span><span class="l"></span><span class="l">dbus-send --system --dest=system.service.intcheck \</span><span class="l">  /system/service/intcheck \</span><span class="l">  system.service.intcheck.SetCheckingAtBoot boolean:false</span></code></pre>
 </figure>
 <figure class="shot shot--d">
-<a href="../assets/redstar/imagemount-1.webp"><img src="../assets/redstar/imagemount-1.webp" width="1280" height="768" alt="Disabling intcheck real-time scanning via dbus-send on RedStar OS" loading="lazy"></a>
+<a href="../assets/redstar/imagemount-1.webp"><img src="../assets/redstar/imagemount-1.webp" width="1280" height="768" alt="Disabling intcheck real-time scanning via dbus-send on RedStar OS" loading="lazy" decoding="async"></a>
 <figcaption>Disabling intcheck as normal-user, no password required</figcaption>
 </figure>
 <p>After getting root, the entire surveillance apparatus can be permanently gutted. And here's the best part: <code>intcheck</code>'s hashing function at 0x804cfb3 reads files in 4096-byte chunks but always passes a hardcoded <code>4096</code> to <code>g_checksum_update</code>. It only hashes the first 4096 bytes of any file, literally defeating the entire purpose of hashing LMAOOO. The integrity checker that's supposed to protect the regime's spyware doesn't even read the whole file. Patch anything after byte 4096 and <code>intcheck</code> will happily report the file as untouched.</p>
@@ -317,7 +317,7 @@
 <div class="p-col p-col--b">
 <h2 id="closing">Closing Remarks</h2>
 <figure class="p-night">
-<div class="p-night__pic"><img src="../assets/redstar/night.webp" width="1200" height="753" alt="the korean peninsula at night from the space station. china and south korea are lit up. north korea, between them, is almost completely dark." loading="lazy"><span class="p-night__tag" aria-hidden="true">north korea</span></div>
+<div class="p-night__pic"><img src="../assets/redstar/night.webp" width="1200" height="753" alt="the korean peninsula at night from the space station. china and south korea are lit up. north korea, between them, is almost completely dark." loading="lazy" decoding="async"><span class="p-night__tag" aria-hidden="true">north korea</span></div>
 <figcaption>NASA, from the ISS. china top left, south korea bottom right. the dark bit in the middle built the OS.</figcaption>
 </figure>
 <p>Kim Jong Un starves his own population, runs forced labor camps, and threatens the civilized world with nuclear weapons. He spent what little his hermit kingdom has left on a surveillance operating system to monitor the people he keeps in chains. And his engineers couldn't even get that right. <code>sprintf</code> into <code>popen</code>. World-writable root sockets. A daemon that runs <code>execv()</code> on whatever the fuck you send it. This is the best the DPRK's entire technical apparatus could produce.</p>
@@ -327,8 +327,8 @@
 <section class="fr p-fin">
 <p class="num">Fuck the DPRK. Fuck their surveillance state. And fuck Kim Jong Un.</p>
 <div class="p-fin__art">
-<img class="p-fin__kim" src="../assets/clown.webp" width="840" height="677" alt="kim jong un in clown paint, honking a bike horn" loading="lazy">
-<img class="p-fin__eagle" src="../assets/redstar/eagle.webp" width="760" height="512" alt="a bald eagle coming in over him, balls out" loading="lazy">
+<img class="p-fin__kim" src="../assets/clown.webp" width="840" height="677" alt="kim jong un in clown paint, honking a bike horn" loading="lazy" decoding="async">
+<img class="p-fin__eagle" src="../assets/redstar/eagle.webp" width="760" height="512" alt="a bald eagle coming in over him, balls out" loading="lazy" decoding="async">
 </div>
 </section>
 <section class="fr p-sec c-grey">
@@ -346,8 +346,8 @@
 <footer class="fr outro">
   <p class="num">end of tape</p>
   <div class="sponsor">
-    <img class="sponsor__burger" src="../assets/burger.webp" width="560" height="433" alt="a cheeseburger, printed in dots">
-    <img class="sponsor__logo" src="../assets/carls.webp" width="620" height="210" alt="carl's jr. logo">
+    <img class="sponsor__burger" src="../assets/burger.webp" width="560" height="433" alt="a cheeseburger, printed in dots" loading="lazy" decoding="async">
+    <img class="sponsor__logo" src="../assets/carls.webp" width="620" height="210" alt="carl's jr. logo" loading="lazy" decoding="async">
     <p>Sponsored by Carl's Jr.</p>
   </div>
 </footer>
