@@ -297,10 +297,29 @@ svg .mid { text-anchor: middle; }
 .f-php { --bg: #cfc4ff; }
 .f-php .logo { width: min(24rem, 92%); rotate: 4deg; }
 .f-php .pen { margin-top: 2.4rem; }
+.s-new2 { --cols: 44fr 56fr; }
+.f-snapd { --bg: #3b0a2e; color: #fff; }
+.f-snapd .logo { width: min(13.5rem, 58%); rotate: 7deg; }
+.f-snapd .pen, .f-tuned .pen { margin-top: 2rem; }
+.f-snapd .redact, .f-tuned .redact { width: 5.6em; }
+.f-snapd .redact { background: #fff; }
+.f-tuned { --bg: var(--paper); }
+.f-tuned .art { display: flex; align-items: flex-end; gap: 1rem; }
+.f-tuned .logo { width: min(14rem, 54%); rotate: -6deg; }
+.f-tuned .redhat { width: min(8rem, 30%); margin: 0 0 .6rem -1.6rem; rotate: 13deg; }
+.hsh { position: absolute; z-index: 1; display: block; height: auto; overflow: visible; }
+.hsh__sh { fill: #000; }
+.hsh__ink { fill: var(--pink); stroke: #000; stroke-width: 5; stroke-linejoin: miter; stroke-miterlimit: 8; paint-order: stroke; }
+.f-snapd .hsh { right: 8%; top: 12%; width: min(11.5rem, 31%); rotate: 9deg; }
+.f-snapd .hsh__sh { fill: #fff; }
+.f-tuned .hsh { right: 5%; top: 1.2rem; width: min(8rem, 23%); rotate: -11deg; }
 .f-mysql { --bg: #00758f; color: #fff; display: flex; flex-wrap: wrap; align-items: center; gap: 1.6rem 4.5rem; }
 .f-mysql .logo { width: min(19rem, 74%); rotate: -6deg; }
 .f-mysql .pen { font-size: clamp(2.4rem, 4.2vw, 3.7rem); line-height: .95; rotate: 2deg; }
 @media (min-width: 761px) {
+  .f-snapd { padding: 2.4rem 1.5rem 3rem 9%; }
+  .f-tuned .hsh { right: 11%; top: 15%; width: min(13rem, 26%); }
+  .f-tuned { padding: 3.6rem 2rem 2.2rem 3rem; }
   .f-mysql { flex-wrap: nowrap; gap: clamp(2rem, 5vw, 4.5rem); padding: 2.2rem 2rem 2.8rem 13%; }
   .f-mysql .logo { flex: none; width: min(21rem, 27vw); }
   .f-mysql .pen { font-size: min(3.3rem, 3.3vw); }
