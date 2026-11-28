@@ -300,8 +300,9 @@ svg .mid { text-anchor: middle; }
 .s-new2 { --cols: 44fr 56fr; }
 .f-snapd { --bg: #3b0a2e; color: #fff; }
 .f-snapd .logo { width: min(13.5rem, 58%); rotate: 7deg; }
-.f-snapd .pen, .f-tuned .pen { margin-top: 2rem; }
-.f-snapd .redact, .f-tuned .redact { width: 5.6em; }
+.f-snapd .pen { margin-top: 2rem; }
+.f-tuned .num { position: relative; z-index: 2; margin-top: 1.8rem; font-size: clamp(2.2rem, 4.4vw, 3.9rem); white-space: nowrap; rotate: -1.5deg; }
+.f-snapd .redact { width: 5.6em; }
 .f-snapd .redact { background: #fff; }
 .f-tuned { --bg: var(--paper); }
 .f-tuned .art { display: flex; align-items: flex-end; gap: 1rem; }
